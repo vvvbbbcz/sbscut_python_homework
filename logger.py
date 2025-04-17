@@ -2,22 +2,32 @@ import logging
 import multiprocessing
 import os
 import sys
-from logging.handlers import RotatingFileHandler
+from logging import LogRecord, StreamHandler
+from logging.handlers import RotatingFileHandler, QueueHandler
+from multiprocessing import Queue
 
 _logdir = "logs"
 _logfile = f"{_logdir}/app.log"
 _debug_logfile = f"{_logdir}/debug.log"
-if not os.path.exists(_logdir):
-	os.makedirs(_logdir, exist_ok=True)
+
+queue: Queue = multiprocessing.Queue(-1)
 
 
-def _listener_configurer():
+def init_logger():
+	root = logging.getLogger()
+	root.handlers.clear()
+	root.addHandler(QueueHandler(queue))
+	root.setLevel(logging.NOTSET)
+
+
+def _listener_configurer(level: str):
 	date_fmt = "%Y-%m-%d %H:%M:%S"
-	fmt = logging.Formatter('[%(asctime)s][%(levelname)s][%(processName)s] %(message)s',
+	fmt = logging.Formatter('[%(asctime)s][%(levelname)s][%(processName)s][%(name)s][%(filename)s:%(lineno)d] %(message)s',
 							datefmt=date_fmt)
 
 	file_handler = RotatingFileHandler(_logfile, 'a', 65536, 10)
 	file_handler.setFormatter(fmt)
+	file_handler.setLevel(logging.INFO)
 
 	debug_handler = RotatingFileHandler(_debug_logfile, 'a', 65536, 10)
 	debug_handler.setFormatter(fmt)
@@ -25,36 +35,40 @@ def _listener_configurer():
 
 	console_handler = logging.StreamHandler(sys.stdout)
 	console_handler.setFormatter(fmt)
+	console_handler.setLevel(level)
 
 	root = logging.getLogger()
+	root.handlers.clear()
 	root.addHandler(file_handler)
 	root.addHandler(debug_handler)
 	root.addHandler(console_handler)
 
 
-def _listener_process(queue):
-	_listener_configurer()
+def _listener_process(queue: Queue, level: str):
+	_listener_configurer(level)
 	while True:
-		try:
-			record = queue.get()
-			if record is None:
-				break
-			logger = logging.getLogger(record.name)
-			logger.handle(record)
-		except Exception:
-			import sys, traceback
-			print('Whoops! Problem:', file=sys.stderr)
-			traceback.print_exc(file=sys.stderr)
+		record: LogRecord = queue.get()
+		if record is None:
+			break
+		logger = logging.getLogger(record.name)
+		logger.handle(record)
 
 
-class Listener:
-	def __init__(self):
-		self.queue = multiprocessing.Queue(-1)
-		self.__process = multiprocessing.Process(target=_listener_process, args=(self.queue,))
+class LogListener:
+	logger = logging.getLogger("sbscut.log_listener")
+
+	def __init__(self, level: str):
+		self.__process = multiprocessing.Process(name="LogListener", target=_listener_process, args=(queue, level))
 
 	def start(self):
+		if not os.path.exists(_logdir):
+			os.makedirs(_logdir, exist_ok=True)
+
 		self.__process.start()
+		init_logger()
+		self.logger.info("Log Listener started")
 
 	def shutdown(self):
-		self.queue.put_nowait(None)
+		self.logger.info("Gracefully shutting down Log Listener...")
+		queue.put_nowait(None)
 		self.__process.join()

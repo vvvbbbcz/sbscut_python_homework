@@ -1,7 +1,8 @@
 import html.parser
-from logger import logger
+import logging
 from config_decoder import config
 
+logger = logging.getLogger("LinkParser")
 
 class LinkParser(html.parser.HTMLParser):
 	def __init__(self):

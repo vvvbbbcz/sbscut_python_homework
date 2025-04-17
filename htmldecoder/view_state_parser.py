@@ -1,5 +1,7 @@
 import html.parser
-from logger import logger
+import logging
+
+logger = logging.getLogger("ViewStateParser")
 
 
 class ViewStateParser(html.parser.HTMLParser):

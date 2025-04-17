@@ -1,7 +1,8 @@
 import html.parser
+import logging
 from enum import Enum
 
-from logger import logger
+logger = logging.getLogger("QuestionParser")
 
 
 class State(Enum):
