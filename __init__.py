@@ -1,17 +1,17 @@
+import logging
 import requests
 from requests import Response
-
 from config_decoder import config
 from htmldecoder.link_parser import LinkParser
 from htmldecoder.question_parser import QuestionParser
 from htmldecoder.view_state_parser import ViewStateParser
-from logger import logger
+from logger import Listener
 
 view_state_parser = ViewStateParser()
 url: str = "http://1024.se.scut.edu.cn/"
 homework: str = config.homework
 cookies: dict = config.cookies
-logger.setLevel(config.log_level)
+logging.getLogger().setLevel(config.log_level)
 headers = {
 	"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,"
 			  "application/signed-exchange;v=b3;q=0.7",
@@ -21,6 +21,9 @@ headers = {
 
 
 def main():
+	log_listener = Listener()
+	log_listener.start()
+
 	link_parser = LinkParser()
 	response: Response = requests.get(url=url, cookies=cookies, headers=headers)
 	link_parser.feed(response.text)
@@ -29,6 +32,9 @@ def main():
 	question_parser = QuestionParser()
 	response: Response = requests.get(url=(url + link_parser.link), cookies=cookies, headers=headers)
 	question_parser.feed(response.text)
+	response.close()
+
+	log_listener.shutdown()
 
 
 if __name__ == '__main__':
