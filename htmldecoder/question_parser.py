@@ -1,6 +1,5 @@
 import html.parser
 from enum import Enum
-from termios import OFDEL
 
 from logger import logger
 
@@ -39,35 +38,37 @@ _state2key: dict[State, str] = {
 class QuestionParser(html.parser.HTMLParser):
 	def __init__(self):
 		super().__init__()
-		self.state: State = State.FREE
-		self.question_cache: dict = {
+		self.__state: State = State.FREE
+		self.__question_cache: dict = {
 			"type": "",
 			"question": "",
 			"answer": []
 		}
-		self.answer_cache: list[str] = []
-		self.result: list[dict] = []
+		self.__answer_cache: list[str] = []
+		self.result_filling: list[dict] = []
+		self.result_running: list[dict] = []
+		self.result_programing: list[dict] = []
 
 	def handle_starttag(self, tag, attrs):
 		tag_attrs = {}
 		for attr in attrs:
 			tag_attrs[attr[0]] = attr[1]
 
-		state_before = self.state
-		self.state = _starttag2state.get(tag, state_before)
-		if self.state == State.START:
+		state_before = self.__state
+		self.__state = _starttag2state.get(tag, state_before)
+		if self.__state == State.START:
 			self.clean_cache()
 
 		if tag == "font" and state_before != State.START:
-			self.state = state_before
+			self.__state = state_before
 
 		if tag == "input":
 			if tag_attrs.get("type") == "text":
-				self.answer_cache.append(tag_attrs["name"])
-				self.question_cache["question"] += "<?>"
+				self.__answer_cache.append(tag_attrs["name"])
+				self.__question_cache["question"] += "<?>"
 
 		if tag == "textarea":
-			self.answer_cache.append(tag_attrs["name"])
+			self.__answer_cache.append(tag_attrs["name"])
 
 	def handle_data(self, data):
 		data = (data
@@ -78,27 +79,38 @@ class QuestionParser(html.parser.HTMLParser):
 				.replace("\u202e", "")
 				.replace("\r", ""))
 
-		if self.state == State.TYPE:
-			self.question_cache["type"] = data
-		elif self.state == State.QUESTION_START:
-			self.question_cache["question"] += data[1:]
-		elif self.state == State.QUESTION:
-			self.question_cache["question"] += data
-		elif self.state == State.CODE:
-			self.question_cache["question"] += "\n"
-			self.question_cache["question"] += data
+		if self.__state == State.TYPE:
+			self.__question_cache["type"] = data
+		elif self.__state == State.QUESTION_START:
+			self.__question_cache["question"] += data[1:]
+		elif self.__state == State.QUESTION:
+			self.__question_cache["question"] += data
+		elif self.__state == State.CODE:
+			self.__question_cache["question"] += "\n"
+			self.__question_cache["question"] += data
 
 	def handle_endtag(self, tag):
-		self.state = _endtag2state.get(tag, self.state)
-		if self.state == State.END:
-			self.question_cache["answer"] = self.answer_cache
-			self.result.append(self.question_cache)
-			print(self.question_cache["question"], end="\n\n")
+		self.__state = _endtag2state.get(tag, self.__state)
+		if self.__state == State.END:
+			self.__question_cache["answer"] = self.__answer_cache
+
+			if self.__question_cache["type"] == "填空":
+				self.result_filling.append(self.__question_cache)
+				logger.debug("Get filling question: " + str(self.__question_cache))
+
+			if self.__question_cache["type"] == "写运行结果":
+				self.result_running.append(self.__question_cache)
+				logger.debug("Get running question: " + str(self.__question_cache))
+
+			if self.__question_cache["type"] == "程序设计":
+				self.result_programing.append(self.__question_cache)
+				logger.debug("Get programing question: " + str(self.__question_cache))
+
 			self.clean_cache()
-			self.state = State.FREE
+			self.__state = State.FREE
 
 	def clean_cache(self):
-		self.question_cache["type"] = ""
-		self.question_cache["question"] = ""
-		self.question_cache["answer"] = []
-		self.answer_cache = []
+		self.__question_cache["type"] = ""
+		self.__question_cache["question"] = ""
+		self.__question_cache["answer"] = []
+		self.__answer_cache = []
