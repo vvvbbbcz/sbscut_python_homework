@@ -41,6 +41,7 @@ class QuestionParser(html.parser.HTMLParser):
 		super().__init__()
 		self.__state: State = State.FREE
 		self.__question_cache: dict = {
+			"number": 0,
 			"type": "",
 			"question": "",
 			"answer": []
@@ -93,6 +94,7 @@ class QuestionParser(html.parser.HTMLParser):
 	def handle_endtag(self, tag):
 		self.__state = _endtag2state.get(tag, self.__state)
 		if self.__state == State.END:
+			self.__question_cache["number"] += 1
 			self.__question_cache["answer"] = self.__answer_cache
 
 			if self.__question_cache["type"] == "填空":
