@@ -70,6 +70,14 @@ class QuestionParser(html.parser.HTMLParser):
 			self.answer_cache.append(tag_attrs["name"])
 
 	def handle_data(self, data):
+		data = (data
+				.replace("\u202a", "")
+				.replace("\u202b", "")
+				.replace("\u202c", "")
+				.replace("\u202d", "")
+				.replace("\u202e", "")
+				.replace("\r", ""))
+
 		if self.state == State.TYPE:
 			self.question_cache["type"] = data
 		elif self.state == State.QUESTION_START:
@@ -77,6 +85,7 @@ class QuestionParser(html.parser.HTMLParser):
 		elif self.state == State.QUESTION:
 			self.question_cache["question"] += data
 		elif self.state == State.CODE:
+			self.question_cache["question"] += "\n"
 			self.question_cache["question"] += data
 
 	def handle_endtag(self, tag):
@@ -84,7 +93,7 @@ class QuestionParser(html.parser.HTMLParser):
 		if self.state == State.END:
 			self.question_cache["answer"] = self.answer_cache
 			self.result.append(self.question_cache)
-			print(self.question_cache)
+			print(self.question_cache["question"], end="\n\n")
 			self.clean_cache()
 			self.state = State.FREE
 
