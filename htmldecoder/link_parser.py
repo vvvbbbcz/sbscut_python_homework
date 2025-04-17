@@ -2,7 +2,7 @@ import html.parser
 import logging
 from config_decoder import config
 
-logger = logging.getLogger("LinkParser")
+logger = logging.getLogger("sbscut.link_parser")
 
 class LinkParser(html.parser.HTMLParser):
 	def __init__(self):

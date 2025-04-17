@@ -2,7 +2,7 @@ import html.parser
 import logging
 from enum import Enum
 
-logger = logging.getLogger("QuestionParser")
+logger = logging.getLogger("sbscut.question_parser")
 
 
 class State(Enum):

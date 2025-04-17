@@ -1,7 +1,7 @@
 import html.parser
 import logging
 
-logger = logging.getLogger("ViewStateParser")
+logger = logging.getLogger("sbscut.view_state_parser")
 
 
 class ViewStateParser(html.parser.HTMLParser):
