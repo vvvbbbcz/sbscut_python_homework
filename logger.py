@@ -10,13 +10,13 @@ _logdir = "logs"
 _logfile = f"{_logdir}/app.log"
 _debug_logfile = f"{_logdir}/debug.log"
 
-queue: Queue = multiprocessing.Queue(-1)
+_queue: Queue = multiprocessing.Queue(-1)
 
 
 def init_logger():
 	root = logging.getLogger()
 	root.handlers.clear()
-	root.addHandler(QueueHandler(queue))
+	root.addHandler(QueueHandler(_queue))
 	root.setLevel(logging.NOTSET)
 
 
@@ -58,7 +58,7 @@ class LogListener:
 	logger = logging.getLogger("sbscut.log_listener")
 
 	def __init__(self, level: str):
-		self.__process = multiprocessing.Process(name="LogListener", target=_listener_process, args=(queue, level))
+		self.__process = multiprocessing.Process(name="LogListener", target=_listener_process, args=(_queue, level))
 
 	def start(self):
 		if not os.path.exists(_logdir):
@@ -70,5 +70,5 @@ class LogListener:
 
 	def shutdown(self):
 		self.logger.info("Gracefully shutting down Log Listener...")
-		queue.put_nowait(None)
+		_queue.put_nowait(None)
 		self.__process.join()
