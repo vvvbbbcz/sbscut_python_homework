@@ -96,15 +96,15 @@ class QuestionParser(html.parser.HTMLParser):
 			self.__question_cache["answer"] = self.__answer_cache
 
 			if self.__question_cache["type"] == "填空":
-				self.result_filling.append(self.__question_cache)
+				self.result_filling.append(self.__question_cache.copy())
 				logger.debug("Get filling question: " + str(self.__question_cache))
 
 			if self.__question_cache["type"] == "写运行结果":
-				self.result_running.append(self.__question_cache)
+				self.result_running.append(self.__question_cache.copy())
 				logger.debug("Get running question: " + str(self.__question_cache))
 
 			if self.__question_cache["type"] == "程序设计":
-				self.result_programing.append(self.__question_cache)
+				self.result_programing.append(self.__question_cache.copy())
 				logger.debug("Get programing question: " + str(self.__question_cache))
 
 			self.clean_cache()
