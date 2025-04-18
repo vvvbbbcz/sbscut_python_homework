@@ -1,5 +1,3 @@
-from multiprocessing import Queue
-
 import requests
 from requests import Response
 
@@ -10,7 +8,6 @@ from htmldecoder.question_parser import QuestionParser
 from htmldecoder.view_state_parser import ViewStateParser
 from logger import LogListener
 from solver import ai_solver, running_solver
-from solver.solver import Solver
 
 view_state_parser = ViewStateParser()
 url: str = "http://1024.se.scut.edu.cn/"
@@ -46,7 +43,11 @@ def main():
 	ai_ques: list[dict] = question_parser.result_filling + question_parser.result_programing
 	ai_worker = ai_solver.launcher(config.ai_threads, ques_cache, ai_ques)
 
+	running_ques: list[dict] = question_parser.result_running
+	running_worker = running_solver.launcher(config.running_threads, ques_cache, running_ques)
+
 	ai_worker.join()
+	running_worker.join()
 	cache.shutdown()
 	log_listener.shutdown()
 
