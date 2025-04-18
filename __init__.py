@@ -1,15 +1,15 @@
 import requests
 from requests import Response
 
+from answer_submitter import submit
 from cache_manager import Cache
 from config_decoder import config
 from htmldecoder.link_parser import LinkParser
 from htmldecoder.question_parser import QuestionParser
 from htmldecoder.view_state_parser import ViewStateParser
 from logger import LogListener
-from solver import ai_solver, running_solver
+from solver import ai_solver
 
-view_state_parser = ViewStateParser()
 url: str = "http://1024.se.scut.edu.cn/"
 homework: str = config.homework
 cookies: dict = config.cookies
@@ -34,8 +34,10 @@ def main():
 	response.close()
 
 	question_parser = QuestionParser()
+	view_state_parser = ViewStateParser()
 	response: Response = requests.get(url=(url + link_parser.link), cookies=cookies, headers=headers)
 	question_parser.feed(response.text)
+	view_state_parser.feed(response.text)
 	response.close()
 
 	ques_cache: dict = cache.load()
@@ -48,9 +50,12 @@ def main():
 	# running_ques: list[dict] = question_parser.result_running
 	# running_worker = running_solver.launcher(config.running_threads, ques_cache, running_ques)
 
-	ai_worker.join()
+	answers = ai_worker.join()
 	# running_worker.join()
 	cache.shutdown()
+
+	submit(answers, view_state_parser, cookies, headers)
+
 	log_listener.shutdown()
 
 
