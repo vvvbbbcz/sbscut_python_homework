@@ -42,9 +42,7 @@ def main():
 
 	ques_cache: dict = cache.load()
 
-	ai_ques: list[dict] = (question_parser.result_filling +
-						   question_parser.result_running +
-						   question_parser.result_programing)
+	ai_ques: list[dict] = question_parser.result
 	ai_worker = ai_solver.launcher(config.ai_threads, ques_cache, ai_ques)
 
 	# running_ques: list[dict] = question_parser.result_running
