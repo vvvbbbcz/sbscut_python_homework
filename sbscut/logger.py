@@ -2,7 +2,7 @@ import logging
 import multiprocessing
 import os
 import sys
-from logging import LogRecord, StreamHandler
+from logging import LogRecord
 from logging.handlers import RotatingFileHandler, QueueHandler
 from multiprocessing import Queue
 

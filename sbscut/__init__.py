@@ -1,14 +1,14 @@
 import requests
 from requests import Response
 
-from answer_submitter import submit
-from cache_manager import Cache
-from config_decoder import config
-from htmldecoder.link_parser import LinkParser
-from htmldecoder.question_parser import QuestionParser
-from htmldecoder.view_state_parser import ViewStateParser
-from logger import LogListener
-from solver import ai_solver
+from sbscut.answer_submitter import submit
+from sbscut.cache_manager import Cache
+from sbscut.config_decoder import config
+from sbscut.htmldecoder.link_parser import LinkParser
+from sbscut.htmldecoder.question_parser import QuestionParser
+from sbscut.htmldecoder.view_state_parser import ViewStateParser
+from sbscut.logger import LogListener
+from sbscut.solver import ai_solver
 
 url: str = "http://1024.se.scut.edu.cn/"
 homework: str = config.homework

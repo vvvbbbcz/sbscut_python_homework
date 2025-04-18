@@ -2,9 +2,9 @@ import hashlib
 import logging
 from multiprocessing import Queue
 
-from cache_manager import add_cache
-from logger import init_logger
-from solver.solver import Solver
+from sbscut.cache_manager import add_cache
+from sbscut.logger import init_logger
+from sbscut.solver.solver import Solver
 
 
 def launcher(threads: int, cache: dict, ques: list[dict]) -> Solver:

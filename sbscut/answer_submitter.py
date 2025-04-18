@@ -4,7 +4,7 @@ from multiprocessing import Queue
 import requests
 from requests import Response
 
-from htmldecoder.view_state_parser import ViewStateParser
+from sbscut.htmldecoder.view_state_parser import ViewStateParser
 
 
 url: str = "http://1024.se.scut.edu.cn/%E8%AF%BE%E5%89%8D%E9%A2%84%E4%B9%A0.aspx"

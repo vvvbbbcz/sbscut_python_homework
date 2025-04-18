@@ -5,7 +5,7 @@ import os
 from multiprocessing import Queue, Process, Pipe
 from multiprocessing.connection import Connection
 
-from config_decoder import config
+from sbscut.config_decoder import config
 
 _queue = Queue(-1)
 

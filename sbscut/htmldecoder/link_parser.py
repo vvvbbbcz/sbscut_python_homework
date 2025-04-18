@@ -1,6 +1,6 @@
 import html.parser
 import logging
-from config_decoder import config
+from sbscut.config_decoder import config
 
 logger = logging.getLogger("sbscut.link_parser")
 

@@ -1,5 +1,4 @@
-from multiprocessing import Process
-from multiprocessing import Queue
+from multiprocessing import Process, Queue
 
 
 class Solver:

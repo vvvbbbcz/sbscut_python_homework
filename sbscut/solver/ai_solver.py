@@ -4,10 +4,10 @@ from multiprocessing import Queue
 
 from openai import OpenAI
 
-from cache_manager import add_cache
-from config_decoder import config
-from logger import init_logger
-from solver.solver import Solver
+from sbscut.cache_manager import add_cache
+from sbscut.config_decoder import config
+from sbscut.logger import init_logger
+from sbscut.solver.solver import Solver
 
 
 def launcher(threads: int, cache: dict, ques: list[dict]) -> Solver:
