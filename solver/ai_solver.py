@@ -47,8 +47,9 @@ def solver(ques: Queue, ans: Queue):
 
 	system_message = {
 		"role": "system",
-		"content": "你是一个正在写Python课程作业的学生，作业有填空题和程序设计题两种。"
+		"content": "你是一个正在写Python课程作业的学生，作业有填空题、写运行结果和程序设计题三种。"
 				   "填空题的空位用“<?>”表示，一道题有一个或多个空位，答案按顺序输出，并以换行分割，每个空的答案均只有一行。"
+				   "写运行结果的题目，如果有提供了多个输入，则不同的输出之间以换行分割。"
 				   "程序设计题需要输出完整的Python代码，不需要任何注释，也不要使用markdown。"
 				   "所有题目只需要输出答案，不需要任何解释。"
 	}
@@ -88,7 +89,8 @@ def solver(ques: Queue, ans: Queue):
 			for blank in question["answer"]:
 				fill[blank] = answers.pop(0)
 			question["answer"] = fill
-		elif question["type"] == "程序设计":
+		# elif question["type"] == "程序设计":
+		else:
 			logger.info(f"Get answer of question {question['number']}: {repr(answer)}")
 
 			fill: dict[str, str] = {question["answer"][0]: answer}

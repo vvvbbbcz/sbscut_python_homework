@@ -40,14 +40,16 @@ def main():
 
 	ques_cache: dict = cache.load()
 
-	ai_ques: list[dict] = question_parser.result_filling + question_parser.result_programing
+	ai_ques: list[dict] = (question_parser.result_filling +
+						   question_parser.result_running +
+						   question_parser.result_programing)
 	ai_worker = ai_solver.launcher(config.ai_threads, ques_cache, ai_ques)
 
-	running_ques: list[dict] = question_parser.result_running
-	running_worker = running_solver.launcher(config.running_threads, ques_cache, running_ques)
+	# running_ques: list[dict] = question_parser.result_running
+	# running_worker = running_solver.launcher(config.running_threads, ques_cache, running_ques)
 
 	ai_worker.join()
-	running_worker.join()
+	# running_worker.join()
 	cache.shutdown()
 	log_listener.shutdown()
 
