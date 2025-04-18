@@ -12,20 +12,22 @@ class State(Enum):
 	QUESTION_START = 3
 	QUESTION = 4
 	CODE = 5
-	END = 6
+	ANSWER = 6
+	END = 7
 
 
 _starttag2state: dict[str, State] = {
 	"td": State.START,
 	"font": State.TYPE,
 	"input": State.QUESTION,
-	"textarea": State.QUESTION,
+	"textarea": State.ANSWER,
 	"pre": State.CODE
 }
 
 _endtag2state: dict[str, State] = {
 	"td": State.END,
 	"font": State.QUESTION_START,
+	"textarea": State.QUESTION,
 	"pre": State.QUESTION
 }
 
