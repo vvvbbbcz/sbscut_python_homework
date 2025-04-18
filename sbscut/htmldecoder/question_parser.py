@@ -68,6 +68,9 @@ class QuestionParser(html.parser.HTMLParser):
 			if tag_attrs.get("type") == "text":
 				self.__answer_cache.append(tag_attrs["name"])
 				self.__question_cache["question"] += "<?>"
+			elif tag_attrs.get("type") == "radio":
+				self.__answer_cache.append(tag_attrs["name"])
+				self.__question_cache["question"] += "\n"
 
 		if tag == "textarea":
 			self.__answer_cache.append(tag_attrs["name"])
@@ -79,6 +82,7 @@ class QuestionParser(html.parser.HTMLParser):
 				.replace("\u202c", "")
 				.replace("\u202d", "")
 				.replace("\u202e", "")
+				.replace("\xa0", "")
 				.replace("\r", ""))
 
 		if self.__state == State.TYPE:
