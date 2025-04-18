@@ -1,2 +1,3 @@
 openai~=1.74.0
 requests~=2.32.3
+socksio~=1.0.0
