@@ -37,7 +37,6 @@ def launcher(threads: int, cache: dict, ques: list[dict]) -> Solver:
 	return worker
 
 
-
 def solver(ques: Queue, ans: Queue):
 	init_logger()
 	logger = logging.getLogger("sbscut.ai_solver")
@@ -50,7 +49,7 @@ def solver(ques: Queue, ans: Queue):
 		"content": "你是一个正在写Python课程作业的学生，作业有填空题、写运行结果和程序设计题三种。"
 				   "填空题的空位用“<?>”表示，一道题有一个或多个空位，答案按顺序输出，并以换行分割，每个空的答案均只有一行。"
 				   "写运行结果的题目，如果有提供了多个输入，则不同的输出之间以换行分割。"
-				   "程序设计题需要输出完整的Python代码，不需要任何注释，也不要使用markdown。"
+				   "程序设计题需要输出完整的Python代码，不需要任何注释，也不要使用markdown，代码片段不要用“```”包裹。"
 				   "所有题目只需要输出答案，不需要任何解释。"
 	}
 
@@ -77,7 +76,6 @@ def solver(ques: Queue, ans: Queue):
 
 		if question["type"] == "填空":
 			answers: list[str] = answer.splitlines(keepends=False)
-			# answers: list[str] = ['int', 'float', 'complex']
 			logger.info(f"Get answer of question {question['number']}: {answers}")
 
 			if len(answers) != len(question["answer"]):
