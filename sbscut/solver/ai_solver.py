@@ -44,13 +44,26 @@ def solver(ques: Queue, ans: Queue):
 
 	client = OpenAI(api_key=config.ds_api_key, base_url="https://api.deepseek.com")
 
+	system_prompts: dict[str, str] = {
+		"单选": "你是一个正在写Python课程作业的学生，作业均为单选题。"
+				"只需要输出选项前的序号（如“A”），不需要作出任何解释。",
+		"填空": "你是一个正在写Python课程作业的学生，作业均为填空题。"
+				"题目的空位用“<?>”表示，一道题有一个或多个空位，答案按顺序输出，并以换行分割，每个空的答案均只有一行。"
+				"只需要输出答案，不需要任何解释。",
+		"写运行结果": "你是一个正在写Python课程作业的学生，作业均为写运行结果的题目。"
+					  "如果有提供了多个输入，则不同的输出之间以换行分割。"
+					  "只需要输出运行结果，不需要任何解释。",
+		"程序填空": "你是一个正在写Python课程作业的学生，作业均为程序填空题。"
+					"题目的空位以“__(1)__”、“__(2)__”的形式出现，一道题有一个或多个空位。"
+					"每个答案前面要添加题号，格式为“(1) ”、“(2) ”"
+					"只需要输出答案，不需要任何解释。",
+		"程序设计": "你是一个正在写Python课程作业的学生，作业均为程序设计题。"
+					"需要输出完整的Python代码，不需要任何注释，也不要使用markdown，代码片段不要用“```”包裹。"
+	}
+
 	system_message = {
 		"role": "system",
-		"content": "你是一个正在写Python课程作业的学生，作业有填空题、写运行结果和程序设计题三种。"
-				   "填空题的空位用“<?>”表示，一道题有一个或多个空位，答案按顺序输出，并以换行分割，每个空的答案均只有一行。"
-				   "写运行结果的题目，如果有提供了多个输入，则不同的输出之间以换行分割。"
-				   "程序设计题需要输出完整的Python代码，不需要任何注释，也不要使用markdown，代码片段不要用“```”包裹。"
-				   "所有题目只需要输出答案，不需要任何解释。"
+		"content": ""
 	}
 
 	user_message = {
@@ -65,6 +78,7 @@ def solver(ques: Queue, ans: Queue):
 		if question is None:
 			break
 
+		system_message["content"] = system_prompts[question["type"]]
 		user_message["content"] = f"{question["type"]}题：\n{question["question"]}"
 		response = client.chat.completions.create(
 			model="deepseek-chat",
@@ -74,7 +88,14 @@ def solver(ques: Queue, ans: Queue):
 
 		answer: str = response.choices[0].message.content
 
-		if question["type"] == "填空":
+		if question["type"] == "单选":
+			logger.info(f"Get answer of question {question['number']}: {answer}")
+			values: dict[str, str] = {"A": "1000", "B": "0100", "C": "0010", "D": "0001"}
+
+			value: str = values[answer[0]]
+			fill: dict[str, str] = {question["answer"][0]: value}
+			question["answer"] = fill
+		elif question["type"] == "填空":
 			answers: list[str] = answer.splitlines(keepends=False)
 			logger.info(f"Get answer of question {question['number']}: {answers}")
 
@@ -87,7 +108,6 @@ def solver(ques: Queue, ans: Queue):
 			for blank in question["answer"]:
 				fill[blank] = answers.pop(0)
 			question["answer"] = fill
-		# elif question["type"] == "程序设计":
 		else:
 			logger.info(f"Get answer of question {question['number']}: {repr(answer)}")
 
